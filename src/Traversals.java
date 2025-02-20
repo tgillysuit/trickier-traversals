@@ -12,7 +12,9 @@ public class Traversals {
    */
   public static int sumLeafNodes(TreeNode<Integer> node) {
     if (node == null) return 0; // We will return 0 if the node is null
+    
     if (node.left == null && node.right == null) return node.value; // We will return the value of the "root" or the only leaf node
+    
     return sumLeafNodes(node.left) + sumLeafNodes(node.right); // We will add up and return the left and right leaf nodes
   }
 
@@ -26,8 +28,10 @@ public class Traversals {
    */
   public static int countInternalNodes(TreeNode<Integer> node) {
     if (node == null) return 0; // Return 0 if the node is null
-    if (node.left == null && node.right == null) return node.value; 
-    if (node.left == null)
+    
+    if (node.left == null && node.right == null) return 0; // return 0 because these are leafs and we're trying to find the internal nodes in between the root and the leaf nodes.
+    
+    return countInternalNodes(node.left) + countInternalNodes(node.right) + 1; // We add the left and right nodes + the root and return the total.
   }
 
   /**
@@ -41,7 +45,12 @@ public class Traversals {
    * @return a post-order traversal string, or an empty string if the tree is null
    */
   public static <T> String buildPostOrderString(TreeNode<T> node) {
-    return null;
+    if (node == null) return ""; // return empty string if the node is null
+
+    String left = buildPostOrderString(node.left); // we set the value of the left subtree to a string
+    String right = buildPostOrderString(node.right); // we set the value of the right subtree to a string
+
+    return left + right + node.value.toString(); // then return the nodes in post-order with converting the root toString()
   }
 
   /**
@@ -53,7 +62,21 @@ public class Traversals {
    * @return a list of node values in a top-to-bottom order, or an empty list if the tree is null
    */
   public static <T> List<T> collectLevelOrderValues(TreeNode<T> node) {
-    return null;
+    List<T> result = new ArrayList<>(); // we create a new empty list 
+    if (node == null) return result; // we return that empty list if the node is null
+
+    Queue<TreeNode<T>> queue = new LinkedList<>(); // creating a queue to help with level order traversal
+    queue.add(node); // add the node to the queue
+
+    while(!queue.isEmpty()) { // traverse through the nodes
+      TreeNode<T> current = queue.poll(); // pop the current node from the Queue
+      result.add(current.value); // add the current value to the ArrayList
+
+      if (current.left != null) queue.add(current.left); // if the left subtree is not null, add the current left node to the Queue 
+      if (current.right != null) queue.add(current.right); // if the right subtree is not null, add the current right node to the Queue 
+    }
+
+    return result; // return the ArrayList
   }
 
   /**
@@ -64,7 +87,21 @@ public class Traversals {
    * @return the number of unique values in the tree, or 0 if the tree is null
    */
   public static int countDistinctValues(TreeNode<Integer> node) {
-    return 0;
+    if (node == null) return 0; // if node is null return 0
+    
+    Set<Integer> unique = new HashSet<>(); // creating a Set to store key-value pairs (nodes, uniques)
+    helpCountDistinctValues(node, unique); // calling the helper method
+    
+    return unique.size(); // returning the size of Set
+  }
+
+  // Helper Method for countDistinctValues
+  private static void helpCountDistinctValues(TreeNode<Integer> node, Set<Integer> unique) {
+    if (node == null) return; // return nothing because this is a void method
+    
+    unique.add(node.value); // add the value of the node to the Set
+    helpCountDistinctValues(node.left, unique); // traverse to the left and add the unique nodes and their uniques
+    helpCountDistinctValues(node.right, unique); // traverse to the right and add the unique nodes and their uniques
   }
 
   /**
@@ -76,9 +113,39 @@ public class Traversals {
    * @return true if there exists a strictly increasing root-to-leaf path, false otherwise
    */
   public static boolean hasStrictlyIncreasingPath(TreeNode<Integer> node) {
+    if (node == null) return false; // return false if null
+
+    Queue<TreeNode<Integer>> queue = new LinkedList<>(); // create a Queue to store current node
+    Queue<Integer> values = new LinkedList<>(); // create a Queue to store previous nodes
+
+    queue.add(node); // adding the node to the Queue
+    values.add(Integer.MIN_VALUE); // adding the Minimum value to the values Queue
+
+    // While the Queue is not empty
+    while (!queue.isEmpty()) {
+      TreeNode<Integer> current = queue.poll(); // create a pointer set it the current node after being removed from the Queue
+      int prevValue = values.poll(); // create a pointer for the previous value after being removed from the values Queue
+
+      // if the current.value is greater than the previous value, we will check to see if the current left and right subtrees are null to return true.
+      if (current.value > prevValue) {
+        if (current.left == null && current.right == null) {
+          return true;
+        }
+      }
+      // if the current right subtree is not null, add the current right node to queue, and add the current.value to the values queue
+      if (current.right != null) {
+        queue.add(current.right);
+        values.add(current.value);
+      }
+      // if the current left subtree is not null, add the current left node to queue, and add the current.value to the values queue
+      if (current.left != null) {
+        queue.add(current.left);
+        values.add(current.value);
+      }
+    }
+    // otherwise return false overall
     return false;
   }
-
   // OPTIONAL CHALLENGE
   /**
    * Checks if two trees have the same shape. Two trees have the same shape
